@@ -1,0 +1,57 @@
+clear all;
+
+x=wavread('ballata_amore_cieco.wav');
+x=x(1:3000000,:);
+y=wavread('canto_servo_pastore.wav');
+y=y(1:3000000,:);
+
+fs=44100;
+ORD=10;
+FT=100000;
+%  d = fdesign.lowpass('N,Fp,Ap', ORD, 2000, 1, fs);
+%  Hd = design(d, 'cheby1');
+% [b,a]=sos2tf(Hd.sosMatrix,Hd.ScaleValues);
+
+%a=1;
+%b = fir1(30,5/44.1);
+a=[1.0000   -9.5400   41.1514 -105.6893  178.9687 -208.7749  169.9080  -95.2530   35.2039   -7.7452    0.7703];
+b=1.0e-08*[0.0012    0.0118    0.0531    0.1417    0.2480    0.2976    0.2480    0.1417    0.0531    0.0118    0.0012];
+%fx=filter(b,a,x);
+%fy=filter(b,a,y);
+%fx=filter(Hd,x);
+% fy=filter(Hd,y);
+
+  fx(1:ORD,1)=zeros();
+  fx(1:ORD,2)=zeros();
+  fy(1:ORD,1)=zeros();
+  fy(1:ORD,2)=zeros();
+  for i=ORD+1:1:FT
+     fx(i,1)= b.*x(i-ORD:i,1)-fliplr(a(2:ORD+1)).*fx(i-ORD:i-1,1);
+     fx(i,2)= b.*x(i-ORD:i,2)-fliplr(a(2:ORD+1)).*fx(i-ORD:i-1,2);
+     fy(i,1)= b.*y(i-ORD:i,1)-fliplr(a(2:ORD+1)).*fy(i-ORD:i-1,1);
+     fy(i,2)= b.*y(i-ORD:i,2)-fliplr(a(2:ORD+1)).*fy(i-ORD:i-1,2);
+     
+     if(mod(i,1000)==0)
+         fprintf('%f\r',i/FT*100);
+     end
+  end
+
+%[X_f,F]=centeredFFT(fx,fs);
+%[Y_f,F]=centeredFFT(fy,fs);
+
+t=0:1/fs:(FT-1)/fs;
+fx_m(:,1)=fx(:,1)'.*cos(2*pi*15000*t);
+fx_m(:,2)=fx(:,2)'.*cos(2*pi*15000*t);
+
+fy_m(:,1)=fy(:,1)'.*cos(2*pi*6000*t);
+fy_m(:,2)=fy(:,2)'.*cos(2*pi*6000*t);
+[X_f_m,F]=centeredFFT(fx_m,fs);
+[Y_f_m,F]=centeredFFT(fy_m,fs);
+
+plot(F,abs(X_f_m));
+hold on;
+plot(F,abs(Y_f_m),'r');
+
+s=fx_m+fy_m;
+
+wavwrite(s,fs,16,'merged_bal_can.wav');

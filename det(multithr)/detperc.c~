@@ -1,0 +1,112 @@
+#include <pthread.h>
+
+typedef struct argomenti{
+           int *elementi;
+           int index; int dim; int **mat; int *det;long *nperm;
+            } argom;
+long nperm=0;
+
+long fat(int n){
+     if(n==1) return 1;
+     else 
+     return n*fat(n-1);
+}
+int classe(int elementi[],int dim){
+    int k,i;
+    int app,clas=0;
+    int aux[dim];
+    
+    for(k=0; k<dim; k++) aux[k]=elementi[k];
+    for(k=0; k<dim; k++){
+              if(k+1!=aux[k]){
+                              app=aux[k];
+                              for(i=k ; i<dim; i++)
+                              if(k+1==aux[i]){         
+                                              aux[k]=aux[i];      
+                                              aux[i]=app;
+                                              clas++;            
+                                              }
+                              }
+                        } 
+    return(clas);
+}
+  
+  
+
+
+void proded_perm(argom* arg){ 
+    register int i,k; 
+    int app,proded=1;
+ 
+    if(arg->index >= 1) { 
+        for(k=arg->index; k >= 0; k--) { 
+        app=arg->elementi[k]; 
+        arg->elementi[k]=arg->elementi[arg->index]; 
+        arg->elementi[arg->index] = app; 
+        arg->index--;
+        proded_perm(arg); 
+        arg->index++;
+        app=arg->elementi[k]; 
+        arg->elementi[k]=arg->elementi[arg->index]; 
+        arg->elementi[arg->index] = app; 
+        
+        } 
+    }
+    else {
+          //*arg->nperm++;
+          //if(*arg->nperm==fat(arg->dim)/2 && *arg->nperm%2==0) pthread_exit(0);
+          for(i=0;  i < arg->dim; i++) 
+                proded=proded*arg->mat[i][arg->elementi[i]-1];
+          if(classe(arg->elementi , arg->dim)%2!=0) proded=-proded;
+          *arg->det=*arg->det+proded;
+          nperm++;
+          } 
+    
+    
+}
+    
+void perc(argom* arg){
+    printf("\n");
+    while(nperm<fat(arg->dim)){
+     printf("\r%.2f%% ", 100*(float)nperm/fat(arg->dim)) ;
+     printf("completato.");
+    }
+}
+  
+int Det(int **mat , int nElementi) { 
+    int elementi1[nElementi],elementi2[nElementi]; 
+    register int i;
+    int det,det1=0,det2=0;
+    long nperm1=0,nperm2=0;
+    pthread_t thread1,thread2;
+    argom arg1,arg2;
+   
+
+    arg1.elementi=elementi1;
+    arg1.index=nElementi-1;
+    arg1.dim=nElementi;
+    arg1.mat=mat;
+    arg1.det=&det1;
+    arg1.nperm=&nperm1;
+
+    arg2=arg1;
+    arg2.elementi=elementi2;
+    arg2.det=&det2;
+    arg2.nperm=&nperm2;
+    for(i=0; i < nElementi; i++) {
+                                  arg1.elementi[i]=i+1;
+                                  arg2.elementi[i]=nElementi-i;
+                                  //printf("%d %d", arg2.elementi[i],arg1.elementi[i]);
+                                  }
+    
+    
+    pthread_create(&thread1,NULL,(void*)&proded_perm,(void*)&arg1);
+    pthread_create(&thread2,NULL,(void*)&perc,(void*)&arg1);
+    //proded_perm(elementi,nElementi-1,nElementi,mat,&det);
+    pthread_join(thread1,NULL);
+    pthread_join(thread2,NULL);
+    
+    nperm=0;
+    det=(*arg1.det);
+    return(det);
+}

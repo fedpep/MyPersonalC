@@ -1,0 +1,23 @@
+clear all
+[data,fs]=wavread('kida1.wav');
+
+Tmax=20;
+dT=0.5;
+dK=dT*fs;
+Kmax=Tmax/dT;
+
+dim=size(data,1);
+dt=1/fs;
+
+a=zeros(Kmax);
+
+j=0;
+for k=0:1:Kmax  
+    j=ceil(dK*k);
+    for i=1:1:dim-j
+        a(k+1)=a(k+1)+data(i,1)*data(j+i,1)*dt;
+    end
+
+end
+t=0:dT:Tmax;
+plot(t,a);
