@@ -17,5 +17,3 @@ The C program performs a real time digital demodulation by multipling for a cos(
 
 - genetics: just a program which implements the computation of a minimum of a function using the genetics algorithms.
 
-Some firmware I developed during my working time in ST can be downloaded on the ST website: http://www.st.com/internet/evalboard/product/253896.jsp . As you will see, this mode of programming is more professional than the experimental projects I described above. The code is more clean and provided with comments in doxygen style to automatically generate docs.
-Moreover, I'm actually working on the iNemo M1 platform ( http://www.st.com/internet/analog/product/253162.jsp ) and I'm currently developing firmware. It will become available in Q1 2013 on the website. If you want, you can refer to this old firmware which is similar: http://www.st.com/internet/evalboard/product/250367.jsp (download the GUI and firmware zip file under Design support>SW Functions).
